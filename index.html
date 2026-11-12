@@ -17,6 +17,11 @@ body{background:var(--bg);color:var(--fg);font-family:var(--font);letter-spacing
 .slide{position:absolute;inset:0;visibility:hidden;pointer-events:none}
 .slide.cur{visibility:visible;pointer-events:auto}
 .slide>img{display:block;width:100%;height:100%;max-width:100%;object-fit:cover;object-position:left top;user-select:none;-webkit-user-drag:none}
+/* 장 본문: 캡처 이미지가 아닌 실제 글자. 1280x720 기준으로 놓고 무대 폭에 맞춰 축소 */
+.pg{position:absolute;inset:0;overflow:hidden}
+.pg .t{position:absolute}
+.pg p{margin:0;word-break:normal}
+.pg i{display:block}
 .msg{position:absolute;inset:0;display:grid;place-items:center;color:var(--mute);font-size:14px}
 .bar{display:flex;align-items:center;gap:10px;min-height:36px;font-size:13px;color:var(--mute);transition:opacity .2s}
 .bar button{font:inherit;color:var(--fg);background:var(--chip);border:1px solid var(--rule);border-radius:4px;height:32px;min-width:36px;padding:0 12px;cursor:pointer}
@@ -114,7 +119,7 @@ body{background:var(--bg);color:var(--fg);font-family:var(--font);letter-spacing
   <button type="button" id="lbn" aria-label="다음 컷">›</button>
   <button type="button" id="lbx" aria-label="닫기">×</button>
 </div>
-<script src="meta.js"></script>
+<script src="meta.js?v=2"></script>
 <script>
 const $=id=>document.getElementById(id), M=window.META, VER=M.ver, N=M.n;
 const pad=i=>String(i).padStart(2,'0');
@@ -133,7 +138,9 @@ function build(){
   const st=$('stage'); $('msg').hidden=true;
   for(let i=1;i<=N;i++){
     const d=document.createElement('div'); d.className='slide'; d.id='s'+pad(i);
-    d.innerHTML='<img src="'+window.PACK[VER][i-1]+'" alt="'+pad(i)+' '+M.titles[i-1]+'" draggable="false">';
+    const pg=M.pages&&M.pages[i-1];
+    d.innerHTML=pg?'<div class="pg" style="background:'+pg.bg+'"><div class="ovi">'+pg.html+'</div></div>':'<img src="'+window.PACK[VER][i-1]+'" alt="'+pad(i)+' '+M.titles[i-1]+'" draggable="false">';
+    d.setAttribute('aria-label',pad(i)+' '+M.titles[i-1]);
     st.appendChild(d); slides.push(d);
   }
   fit(); go(fromHash(),true);
@@ -227,7 +234,7 @@ function closeLB(){const s=lbState; if(!s) return; $('lbm').innerHTML=''; $('lb'
 $('lbx').onclick=closeLB; $('lbp').onclick=e=>{e.stopPropagation(); step(-1);}; $('lbn').onclick=e=>{e.stopPropagation(); step(1);};
 $('lb').addEventListener('click',e=>{if(e.target===$('lb')||e.target===$('lbm')) closeLB();});
 
-load(VER+'/pack.js',build,()=>{$('msg').textContent='불러오기 실패 · 새로 고침';});
+if(M.pages&&M.pages.length===N) build(); else load(VER+'/pack.js',build,()=>{$('msg').textContent='불러오기 실패 · 새로 고침';});
 </script>
 
 </body>
